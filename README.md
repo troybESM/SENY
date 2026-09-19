@@ -132,3 +132,24 @@ you deploy elsewhere.
 > The dataset under `data/processed/` is committed, so the workflow can build the
 > site without a Tiingo token. Regenerate it locally with `npm run fetch:data`
 > when you add tickers.
+
+### Deploy role permissions
+
+The deploy role must be allowed to manage the stack's resources (CloudFormation,
+S3, CloudFront + Origin Access Control). Those permissions are in
+[`infra/deploy-role-policy.json`](infra/deploy-role-policy.json). Attach them to
+the role, e.g.:
+
+```bash
+aws iam put-role-policy \
+  --role-name _GitHub_Deploy_Role \
+  --policy-name seny-deploy \
+  --policy-document file://infra/deploy-role-policy.json
+```
+
+If a previous run left the stack in `ROLLBACK_COMPLETE`, delete it first (the
+bucket is retained, so no data is lost):
+
+```bash
+aws cloudformation delete-stack --stack-name seny-market-history --region us-east-1
+```
