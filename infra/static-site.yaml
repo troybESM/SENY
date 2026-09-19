@@ -1,0 +1,118 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Static-site hosting for the Market History game: a private S3 bucket served
+  through CloudFront using Origin Access Control (OAC). The bucket is NOT
+  public; only CloudFront can read it, and all traffic is HTTPS.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: seny-market-history
+    Description: Name prefix used for the bucket and resource tags.
+    AllowedPattern: "[a-z0-9-]+"
+    ConstraintDescription: lowercase letters, numbers, and hyphens only.
+
+Resources:
+  # ---------------------------------------------------------------------------
+  # Private origin bucket. Public access fully blocked; CloudFront reads via OAC.
+  # ---------------------------------------------------------------------------
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "${ProjectName}-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # Allow only this CloudFront distribution to GetObject from the bucket.
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontOACRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${SiteBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+
+  # Origin Access Control: the modern replacement for Origin Access Identity.
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${ProjectName}-oac"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub "${ProjectName} static site"
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt SiteBucket.RegionalDomainName
+            OriginAccessControlId: !Ref OriginAccessControl
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          # AWS managed "CachingOptimized" policy.
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD]
+        # SPA-friendly: serve index.html for client-routed paths / missing keys.
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+Outputs:
+  BucketName:
+    Description: S3 bucket to sync the built site into.
+    Value: !Ref SiteBucket
+    Export:
+      Name: !Sub "${ProjectName}-bucket"
+  DistributionId:
+    Description: CloudFront distribution id (used for cache invalidation).
+    Value: !Ref Distribution
+    Export:
+      Name: !Sub "${ProjectName}-distribution-id"
+  SiteURL:
+    Description: Public HTTPS URL of the site.
+    Value: !Sub "https://${Distribution.DomainName}"

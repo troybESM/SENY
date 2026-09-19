@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-19T19:19:59.721Z",
+  "coverageStart": "1962-01-02",
+  "coverageEnd": "2026-09-18",
+  "securities": [
+    {
+      "id": "AAPL",
+      "name": "Apple Inc.",
+      "sector": "Technology",
+      "exchange": "NASDAQ",
+      "file": "securities/AAPL.json",
+      "firstDate": "1980-12-12",
+      "lastDate": "2026-09-18",
+      "barCount": 11532
+    },
+    {
+      "id": "GE",
+      "name": "General Electric",
+      "sector": "Industrials",
+      "exchange": "NYSE",
+      "file": "securities/GE.json",
+      "firstDate": "1962-01-02",
+      "lastDate": "2026-09-18",
+      "barCount": 16285
+    },
+    {
+      "id": "GM",
+      "name": "General Motors",
+      "sector": "Consumer Discretionary",
+      "exchange": "NYSE",
+      "file": "securities/GM.json",
+      "firstDate": "2010-11-18",
+      "lastDate": "2026-09-18",
+      "barCount": 3981
+    },
+    {
+      "id": "IBM",
+      "name": "International Business Machines",
+      "sector": "Technology",
+      "exchange": "NYSE",
+      "file": "securities/IBM.json",
+      "firstDate": "1962-01-02",
+      "lastDate": "2026-09-18",
+      "barCount": 16285
+    },
+    {
+      "id": "KO",
+      "name": "The Coca-Cola Company",
+      "sector": "Consumer Staples",
+      "exchange": "NYSE",
+      "file": "securities/KO.json",
+      "firstDate": "1962-01-02",
+      "lastDate": "2026-09-18",
+      "barCount": 16285
+    },
+    {
+      "id": "PG",
+      "name": "Procter & Gamble",
+      "sector": "Consumer Staples",
+      "exchange": "NYSE",
+      "file": "securities/PG.json",
+      "firstDate": "1970-01-02",
+      "lastDate": "2026-09-18",
+      "barCount": 14298
+    },
+    {
+      "id": "XOM",
+      "name": "Exxon Mobil",
+      "sector": "Energy",
+      "exchange": "NYSE",
+      "file": "securities/XOM.json",
+      "firstDate": "1970-01-02",
+      "lastDate": "2026-09-18",
+      "barCount": 14298
+    }
+  ]
+}

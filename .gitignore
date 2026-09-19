@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# Raw downloaded source files (kept out of git; regenerate via npm run fetch:data).
+# The processed dataset under data/processed/ IS committed so the game can bundle it.
+data/raw/
+.kiro/

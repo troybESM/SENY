@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Market History — Live Through the Market</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0;
+        font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+      }
+      header {
+        padding: 2rem 1.5rem 1rem;
+        border-bottom: 1px solid #21262d;
+      }
+      h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+      header p { margin: 0; color: #8b949e; }
+      main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+      .meta { color: #8b949e; margin-bottom: 1rem; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #21262d; }
+      th { color: #8b949e; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
+      td.num { text-align: right; font-variant-numeric: tabular-nums; }
+      .id { font-weight: 600; }
+      .err { color: #f85149; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Market History</h1>
+      <p>Live through stock-market history with real daily data.</p>
+    </header>
+    <main>
+      <div id="status" class="meta">Loading dataset…</div>
+      <table id="roster" hidden>
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th>Sector</th>
+            <th class="num">First</th>
+            <th class="num">Last</th>
+            <th class="num">Bars</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </main>
+
+    <script type="module">
+      // Data-spike smoke test: load the manifest the pipeline produced and render
+      // the roster. This proves the deployed site can read the bundled dataset.
+      const status = document.getElementById("status");
+      const table = document.getElementById("roster");
+      const tbody = table.querySelector("tbody");
+
+      try {
+        const res = await fetch("./data/manifest.json");
+        if (!res.ok) throw new Error(`manifest.json -> ${res.status}`);
+        const m = await res.json();
+
+        status.textContent =
+          `${m.securities.length} securities · coverage ${m.coverageStart} → ${m.coverageEnd} · ` +
+          `schema v${m.schemaVersion}`;
+
+        for (const s of m.securities) {
+          const tr = document.createElement("tr");
+          tr.innerHTML =
+            `<td class="id">${s.id}</td>` +
+            `<td>${s.name}</td>` +
+            `<td>${s.sector ?? ""}</td>` +
+            `<td class="num">${s.firstDate}</td>` +
+            `<td class="num">${s.lastDate}</td>` +
+            `<td class="num">${s.barCount.toLocaleString()}</td>`;
+          tbody.appendChild(tr);
+        }
+        table.hidden = false;
+      } catch (e) {
+        status.className = "meta err";
+        status.textContent = `Failed to load dataset: ${e.message}`;
+      }
+    </script>
+  </body>
+</html>

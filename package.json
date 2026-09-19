@@ -1,0 +1,18 @@
+{
+  "name": "market-history-game",
+  "version": "0.0.1",
+  "private": true,
+  "description": "A persistent browser-based game where you live through stock-market history using real daily data.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:site": "tsx scripts/build-site.ts",
+    "fetch:data": "tsx scripts/fetch-data.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
