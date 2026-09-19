@@ -125,7 +125,9 @@ Then set two **repository variables** (Settings → Secrets and variables → Ac
 | Variable | Example |
 |---|---|
 | `AWS_DEPLOY_ROLE_ARN` | `arn:aws:iam::123456789012:role/seny-deploy` |
-| `AWS_REGION` | `us-east-1` |
+
+The region is fixed to `us-east-1` in the workflow's `env` block; change it there if
+you deploy elsewhere.
 
 > The dataset under `data/processed/` is committed, so the workflow can build the
 > site without a Tiingo token. Regenerate it locally with `npm run fetch:data`
